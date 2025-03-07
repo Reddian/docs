@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
+    "title": "RocketSkip API",
     "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
     "license": {
       "name": "MIT"
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.rocketskip.com/api/v1/"
     }
   ],
   "security": [
@@ -19,7 +19,7 @@
     }
   ],
   "paths": {
-    "/plants": {
+    "/property/skiptrace": {
       "get": {
         "description": "Returns all plants from the system that the user has access to",
         "parameters": [
@@ -41,7 +41,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Plant"
+                    "$ref": "#/components/schemas/PropertyResponse"
                   }
                 }
               }
@@ -60,13 +60,13 @@
         }
       },
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Send a property to get phone numbers for the property owner",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Property to skip trace",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/Property"
               }
             }
           },
@@ -74,11 +74,11 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Results found for skip tracing",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/PropertyResponse"
                 }
               }
             }
@@ -139,7 +139,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/Property"
               }
             }
           }
@@ -154,37 +154,53 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
+      "Property": {
         "required": [
-          "name"
+          "street_address","city","state","zip_code"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
+          "first_name": {
+            "description": "First name of the property owner",
             "type": "string"
           },
-          "tag": {
-            "description": "Tag to specify the type",
+          "last_name": {
+            "description": "Last name of the property owner",
+            "type": "string"
+          },
+          "street_address": {
+            "description": "Street address of the property",
+            "type": "string"
+          },
+          "city": {
+            "description": "City of the property",
+            "type": "string"
+          },
+          "state": {
+            "description": "State of the property",
+            "type": "string"
+          },
+          "zip_code": {
+            "description": "Zip code of the property",
             "type": "string"
           }
         }
       },
-      "NewPlant": {
+      "PropertyResponse": {
         "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
           {
             "required": [
               "id"
             ],
             "type": "object",
             "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+              "error": {
+                "description": "If skip tracing was unsuccessful, this will say the reason",
+                "type": "string"
+              },
+              "results": {
+                "description": "Results returned",
+                "type": "array"
               }
             }
           }

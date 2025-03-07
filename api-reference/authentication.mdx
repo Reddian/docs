@@ -1,0 +1,129 @@
+---
+title: 'Authentication'
+description: 'Securely authenticate your app'
+---
+
+### Overview
+RocketSkip uses OAuth 2.0 to provide secure and scalable authentication and authorization for accessing its APIs. This guide outlines how to integrate OAuth 2.0 into your application to authenticate users and access RocketSkip’s services.
+
+### OAuth 2.0 Grant Types Supported
+RocketSkip supports the following OAuth 2.0 grant types:
+
+- **Authorization Code Grant**: Best suited for web and mobile applications.
+- **Refresh Token Grant**: Used to obtain a new access token without requiring the user to log in again.
+
+### Authentication Flow
+
+#### 1. Obtain Authorization Code
+For applications using the **Authorization Code Grant**, redirect users to RocketSkip’s authorization endpoint:
+
+```
+GET https://api.rocketskip.com/oauth/authorize
+?response_type=code
+&client_id=YOUR_CLIENT_ID
+&redirect_uri=YOUR_REDIRECT_URI
+&scope=read
+&state=YOUR_UNIQUE_STATE
+```
+
+**Parameters:**
+- `response_type`: Must be `code`.
+- `client_id`: Your application's client ID.
+- `redirect_uri`: The URL where RocketSkip will redirect after authorization.
+- `scope`: Space-separated list of permissions.
+- `state`: A unique identifier to prevent CSRF attacks.
+
+Upon successful authorization, RocketSkip will redirect to the specified `redirect_uri` with an authorization code.
+
+### 2. Exchange Authorization Code for Access Token
+To obtain an access token, send a POST request to RocketSkip’s token endpoint:
+
+```
+POST https://api.rocketskip.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+&grant_type=authorization_code
+&code=AUTHORIZATION_CODE
+&redirect_uri=YOUR_REDIRECT_URI
+```
+
+**Response:**
+```json
+{
+  "access_token": "YOUR_ACCESS_TOKEN",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "YOUR_REFRESH_TOKEN"
+}
+```
+
+#### 3. Access RocketSkip API
+Use the access token to make authenticated API requests:
+
+```
+GET https://api.rocketskip.com/resource
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+#### 4. Refreshing the Access Token
+To refresh an expired access token, send a request with the refresh token:
+
+```
+POST https://api.rocketskip.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+&grant_type=refresh_token
+&refresh_token=YOUR_REFRESH_TOKEN
+```
+
+### Client Credentials Grant (Machine-to-Machine Authentication)
+For server-to-server communication, use the **Client Credentials Grant**:
+
+```
+POST https://api.rocketskip.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+&grant_type=client_credentials
+&scope=read
+```
+
+**Response:**
+```json
+{
+  "access_token": "YOUR_ACCESS_TOKEN",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+### Security Considerations
+- Always use HTTPS to prevent token interception.
+- Store `client_secret` securely and never expose it in front-end applications.
+- Use the `state` parameter in authorization requests to prevent CSRF attacks.
+- Access tokens should be short-lived; use refresh tokens to maintain sessions securely.
+
+### Error Handling
+If a request fails, RocketSkip will return an error response:
+
+```json
+{
+  "error": "invalid_request",
+  "error_description": "Invalid authorization code"
+}
+```
+
+Common error codes:
+- `invalid_request`: Missing or malformed parameters.
+- `invalid_client`: Invalid client credentials.
+- `invalid_grant`: Authorization code or refresh token is invalid.
+- `unauthorized_client`: The client is not authorized for the requested grant type.
+- `access_denied`: The user denied the request.
+
+## Conclusion
+By following this guide, you can securely authenticate and authorize users to access RocketSkip’s API using OAuth 2.0. For further support, contact [support@rocketskip.com](mailto:support@rocketskip.com).
